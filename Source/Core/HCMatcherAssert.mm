@@ -13,14 +13,15 @@
 #import "HCMatcher.h"
 
     // Objective-C
-#import <objc/objc-class.h>
+#import <objc/runtime.h>
+#import <objc/message.h>
 
 
 namespace {
 
 /**
     Create OCUnit failure
-    
+
     With OCUnit's extension to NSException, this is effectively the same as
 @code
 [NSException failureInFile: [NSString stringWithUTF8String:fileName]
@@ -41,12 +42,12 @@ NSException* createOCUnitException(const char* fileName, int lineNumber, NSStrin
     NSInvocation* invocation = [NSInvocation invocationWithMethodSignature:signature];
     [invocation setTarget:[NSException class]];
     [invocation setSelector:selector];
-    
+
     id fileArg = [NSString stringWithUTF8String:fileName];
     [invocation setArgument:&fileArg atIndex:2];
     [invocation setArgument:&lineNumber atIndex:3];
     [invocation setArgument:&description atIndex:4];
-    
+
     [invocation invoke];
     [invocation getReturnValue:&result];
     return result;
@@ -87,7 +88,7 @@ void HC_assertThatWithLocation(id testCase, id actual, id<HCMatcher> matcher,
         NSInvocation* invocation = [NSInvocation invocationWithMethodSignature:signature];
         [invocation setTarget:testCase];
         [invocation setSelector:selector];
-        [invocation setArgument:&assertThatFailure atIndex:2];        
+        [invocation setArgument:&assertThatFailure atIndex:2];
         [invocation invoke];
     }
 }
