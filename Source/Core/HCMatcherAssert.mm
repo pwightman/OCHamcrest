@@ -68,6 +68,10 @@ NSException* createAssertThatFailure(const char* fileName, int lineNumber, NSStr
 }   // namespace
 
 
+@interface NSObject (SpecFailureMethodDeclarationForQuietingTheCompiler)
+- (void)failWithException:(NSException *)exception;
+@end
+
 extern "C" {
 
 void HC_assertThatWithLocation(id testCase, id actual, id<HCMatcher> matcher,
@@ -83,13 +87,15 @@ void HC_assertThatWithLocation(id testCase, id actual, id<HCMatcher> matcher,
         NSException* assertThatFailure = createAssertThatFailure(fileName, lineNumber, [description description]);
 
         // Invoke [testCase failWithException:assertThatFailure] without linking OCUnit.
-        SEL selector = @selector(failWithException:);
-        NSMethodSignature* signature = [testCase methodSignatureForSelector:selector];
-        NSInvocation* invocation = [NSInvocation invocationWithMethodSignature:signature];
-        [invocation setTarget:testCase];
-        [invocation setSelector:selector];
-        [invocation setArgument:&assertThatFailure atIndex:2];
-        [invocation invoke];
+//        SEL selector = @selector(failWithException:);
+//        NSMethodSignature* signature = [testCase methodSignatureForSelector:selector];
+//        NSInvocation* invocation = [NSInvocation invocationWithMethodSignature:signature];
+//        [invocation setTarget:testCase];
+//        [invocation setSelector:selector];
+//        [invocation setArgument:&assertThatFailure atIndex:2];
+//        [invocation invoke];
+
+        [testCase failWithException:assertThatFailure];
     }
 }
 
