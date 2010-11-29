@@ -886,7 +886,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "xcodebuild -project ${PROJECT_NAME}.xcodeproj -sdk iphonesimulator3.2 -target ${PROJECT_NAME}-StaticLib -configuration ${CONFIGURATION} clean build\nxcodebuild -project ${PROJECT_NAME}.xcodeproj -sdk iphoneos3.2 -target ${PROJECT_NAME}-StaticLib -configuration ${CONFIGURATION} clean build";
+			shellScript = "xcodebuild -project ${PROJECT_NAME}.xcodeproj -sdk iphonesimulator4.2 -target ${PROJECT_NAME}-StaticLib -configuration ${CONFIGURATION} clean build\nxcodebuild -project ${PROJECT_NAME}.xcodeproj -sdk iphoneos4.2 -target ${PROJECT_NAME}-StaticLib -configuration ${CONFIGURATION} clean build";
 		};
 		AEF158B111C9704A005B4F92 /* Build universal static lib */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1195,7 +1195,7 @@
 				INFOPLIST_FILE = Info.plist;
 				PREBINDING = NO;
 				PRODUCT_NAME = "OCHamcrest-StaticLib";
-				SDKROOT = iphonesimulator4.1;
+				SDKROOT = iphonesimulator4.2;
 			};
 			name = Debug;
 		};
@@ -1211,7 +1211,7 @@
 				INFOPLIST_FILE = Info.plist;
 				PREBINDING = NO;
 				PRODUCT_NAME = "OCHamcrest-StaticLib";
-				SDKROOT = iphonesimulator4.1;
+				SDKROOT = iphonesimulator4.2;
 				ZERO_LINK = NO;
 			};
 			name = Release;
