@@ -1,67 +1,88 @@
 //
 //  OCHamcrest - HasDescriptionTest.m
-//  Copyright 2009 www.hamcrest.org. See LICENSE.txt
+//  Copyright 2011 hamcrest.org. See LICENSE.txt
 //
 //  Created by: Jon Reid
 //
 
-    // Inherited
-#import "AbstractMatcherTest.h"
-
-    // OCHamcrest
+    // Class under test
 #define HC_SHORTHAND
 #import "HCHasDescription.h"
+
+    // Other OCHamcrest
 #import "HCIsEqual.h"
-#import "HCIsNot.h"
-#import "HCMatcherAssert.h"
+
+    // Test support
+#import "AbstractMatcherTest.h"
 
 
-static NSString* DESCRIPTION_RESULT = @"description result";
+static NSString *fakeDescription = @"DESCRIPTION";
 
-
-@interface FakeObject : NSObject
+@interface FakeWithDescription : NSObject
 @end
 
-@implementation FakeObject
-- (NSString*) description  { return DESCRIPTION_RESULT; }
+@implementation FakeWithDescription
++ (id)fake  { return [[[self alloc] init] autorelease]; }
+- (NSString *)description  { return fakeDescription; }
 @end
 
+//--------------------------------------------------------------------------------------------------
 
 @interface HasDescriptionTest : AbstractMatcherTest
 @end
 
 @implementation HasDescriptionTest
 
-- (id<HCMatcher>) createMatcher
+- (id<HCMatcher>)createMatcher
 {
     return hasDescription(equalTo(@"irrelevant"));
 }
 
 
-- (void) testPassesResultOfDescriptionToNestedMatcher
+- (void)testPassesResultOfDescriptionToNestedMatcher
 {
-    FakeObject* ARG = [[[FakeObject alloc] init] autorelease];
-    assertThat(ARG, hasDescription(equalTo(DESCRIPTION_RESULT)));
-    assertThat(ARG, isNot(hasDescription(equalTo(@"OTHER STRING"))));
+    FakeWithDescription* fake = [FakeWithDescription fake];
+    assertMatches(@"equal", hasDescription(equalTo(fakeDescription)), fake);
+    assertDoesNotMatch(@"unequal", hasDescription(equalTo(@"foo")), fake);
 }
 
 
-- (void) testProvidesConvenientShortcutForDescriptionEqualTo
+- (void)testProvidesConvenientShortcutForDescriptionEqualTo
 {
-    FakeObject* ARG = [[[FakeObject alloc] init] autorelease];
-    assertThat(ARG, hasDescription(DESCRIPTION_RESULT));
-    assertThat(ARG, isNot(hasDescription(@"OTHER STRING")));
+    FakeWithDescription* fake = [FakeWithDescription fake];
+    assertMatches(@"equal", hasDescription(fakeDescription), fake);
+    assertDoesNotMatch(@"unequal", hasDescription(@"foo"), fake);
 }
 
 
-- (void) testHasReadableDescription
+- (void)testMismatchDoesNotRepeatTheDescription
 {
-    id<HCMatcher> descriptionMatcher = equalTo(DESCRIPTION_RESULT);
-    id<HCMatcher> matcher = hasDescription(descriptionMatcher);
+    FakeWithDescription* fake = [FakeWithDescription fake];
+    assertMismatchDescription(@"was \"DESCRIPTION\"", hasDescription(@"foo"), fake);
+}
 
-    STAssertEqualObjects([matcher description],
-                            ([NSString stringWithFormat:@"with description %@", [descriptionMatcher description]]),
-                            nil);
+
+- (void)testHasReadableDescription
+{
+    assertDescription(@"an object with description \"foo\"", hasDescription(@"foo"));
+}
+
+
+- (void)testSuccessfulMatchDoesNotGenerateMismatchDescription
+{
+    assertNoMismatchDescription(hasDescription(@"DESCRIPTION"), [FakeWithDescription fake]);
+}
+
+
+- (void)testMismatchDescriptionShowsActualArgument
+{
+    assertMismatchDescription(@"was \"bad\"", hasDescription(@"foo"), @"bad");
+}
+
+
+- (void)testDescribeMismatch
+{
+    assertDescribeMismatch(@"was \"bad\"", hasDescription(@"foo"), @"bad");
 }
 
 @end

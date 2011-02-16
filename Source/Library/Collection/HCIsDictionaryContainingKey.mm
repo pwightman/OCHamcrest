@@ -1,6 +1,6 @@
 //
 //  OCHamcrest - HCIsDictionaryContainingKey.mm
-//  Copyright 2009 www.hamcrest.org. See LICENSE.txt
+//  Copyright 2011 hamcrest.org. See LICENSE.txt
 //
 //  Created by: Jon Reid
 //
@@ -10,18 +10,19 @@
 
     // OCHamcrest
 #import "HCDescription.h"
+#import "HCRequireNonNilObject.h"
 #import "HCWrapInMatcher.h"
 
 
 @implementation HCIsDictionaryContainingKey
 
-+ (HCIsDictionaryContainingKey*) isDictionaryContainingKey:(id<HCMatcher>)theKeyMatcher
++ (id)isDictionaryContainingKey:(id<HCMatcher>)theKeyMatcher
 {
-    return [[[HCIsDictionaryContainingKey alloc] initWithKeyMatcher:theKeyMatcher] autorelease];
+    return [[[self alloc] initWithKeyMatcher:theKeyMatcher] autorelease];
 }
 
 
-- (id) initWithKeyMatcher:(id<HCMatcher>)theKeyMatcher
+- (id)initWithKeyMatcher:(id<HCMatcher>)theKeyMatcher
 {
     self = [super init];
     if (self != nil)
@@ -30,25 +31,18 @@
 }
 
 
-- (void) dealloc
+- (void)dealloc
 {
     [keyMatcher release];
-    
     [super dealloc];
 }
 
 
-- (BOOL) matches:(id)dict
+- (BOOL)matches:(id)dict
 {
     if ([dict isKindOfClass:[NSDictionary class]])
     {
-#if defined(OBJC_API_VERSION) && OBJC_API_VERSION >= 2
         for (id oneKey in dict)
-#else
-        NSEnumerator* enumerator = [dict keyEnumerator];
-        id oneKey;
-        while ((oneKey = [enumerator nextObject]) != nil)
-#endif
         {
             if ([keyMatcher matches:oneKey])
                 return YES;
@@ -58,20 +52,18 @@
 }
 
 
-- (void) describeTo:(id<HCDescription>)description
+- (void)describeTo:(id<HCDescription>)description
 {
-    [[description appendText:@"dictionary with key "]
-                    appendDescriptionOf:keyMatcher];
+    [[description appendText:@"a dictionary containing key "]
+                  appendDescriptionOf:keyMatcher];
 }
 
 @end
 
+//--------------------------------------------------------------------------------------------------
 
-extern "C" {
-
-id<HCMatcher> HC_hasKey(id item)
+OBJC_EXPORT id<HCMatcher> HC_hasKey(id matcherOrValue)
 {
-    return [HCIsDictionaryContainingKey isDictionaryContainingKey:HC_wrapInMatcher(item)];
+    HCRequireNonNilObject(matcherOrValue);
+    return [HCIsDictionaryContainingKey isDictionaryContainingKey:HCWrapInMatcher(matcherOrValue)];
 }
-
-}   // extern "C"

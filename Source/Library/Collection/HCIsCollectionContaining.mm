@@ -1,6 +1,6 @@
 //
 //  OCHamcrest - HCIsCollectionContaining.mm
-//  Copyright 2009 www.hamcrest.org. See LICENSE.txt
+//  Copyright 2011 hamcrest.org. See LICENSE.txt
 //
 //  Created by: Jon Reid
 //
@@ -11,18 +11,19 @@
     // OCHamcrest
 #import "HCAllOf.h"
 #import "HCDescription.h"
+#import "HCRequireNonNilObject.h"
 #import "HCWrapInMatcher.h"
 
 
 @implementation HCIsCollectionContaining
 
-+ (HCIsCollectionContaining*) isCollectionContaining:(id<HCMatcher>)anElementMatcher
++ (id)isCollectionContaining:(id<HCMatcher>)anElementMatcher
 {
-    return [[[HCIsCollectionContaining alloc] initWithMatcher:anElementMatcher] autorelease];
+    return [[[self alloc] initWithMatcher:anElementMatcher] autorelease];
 }
 
 
-- (id) initWithMatcher:(id<HCMatcher>)anElementMatcher
+- (id)initWithMatcher:(id<HCMatcher>)anElementMatcher
 {
     self = [super init];
     if (self != nil)
@@ -31,29 +32,19 @@
 }
 
 
-- (void) dealloc
+- (void)dealloc
 {
     [elementMatcher release];
-    
     [super dealloc];
 }
 
 
-- (BOOL) matches:(id)collection
+- (BOOL)matches:(id)collection
 {
-#if defined(OBJC_API_VERSION) && OBJC_API_VERSION >= 2
     if (![collection conformsToProtocol:@protocol(NSFastEnumeration)])
         return NO;
         
     for (id item in collection)
-#else
-    if (![collection respondsToSelector:@selector(objectEnumerator)])
-        return NO;
-
-    NSEnumerator* enumerator = [collection objectEnumerator];
-    id item;
-    while ((item = [enumerator nextObject]) != nil)
-#endif
     {
         if ([elementMatcher matches:item])
             return YES;
@@ -62,38 +53,36 @@
 }
 
 
-- (void) describeTo:(id<HCDescription>)description
+- (void)describeTo:(id<HCDescription>)description
 {
     [[description appendText:@"a collection containing "]
-                    appendDescriptionOf:elementMatcher];
+                  appendDescriptionOf:elementMatcher];
 }
 
 @end
 
+//--------------------------------------------------------------------------------------------------
 
-extern "C" {
-
-id<HCMatcher> HC_hasItem(id item)
+OBJC_EXPORT id<HCMatcher> HC_hasItem(id item)
 {
-    return [HCIsCollectionContaining isCollectionContaining:HC_wrapInMatcher(item)];
+    HCRequireNonNilObject(item);
+    return [HCIsCollectionContaining isCollectionContaining:HCWrapInMatcher(item)];
 }
 
 
-id<HCMatcher> HC_hasItems(id item, ...)
+OBJC_EXPORT id<HCMatcher> HC_hasItems(id items, ...)
 {
-    NSMutableArray* matcherList = [NSMutableArray arrayWithObject:HC_hasItem(item)];
+    NSMutableArray *matchers = [NSMutableArray arrayWithObject:HC_hasItem(items)];
     
     va_list args;
-    va_start(args, item);
-    item = va_arg(args, id);
-    while (item != nil)
+    va_start(args, items);
+    items = va_arg(args, id);
+    while (items != nil)
     {
-        [matcherList addObject:HC_hasItem(item)];
-        item = va_arg(args, id);
+        [matchers addObject:HC_hasItem(items)];
+        items = va_arg(args, id);
     }
     va_end(args);
     
-    return [HCAllOf allOf:matcherList];
+    return [HCAllOf allOf:matchers];
 }
-
-}   // extern "C"

@@ -1,6 +1,6 @@
 //
 //  OCHamcrest - HCOrderingComparison.mm
-//  Copyright 2009 www.hamcrest.org. See LICENSE.txt
+//  Copyright 2011 hamcrest.org. See LICENSE.txt
 //
 //  Created by: Jon Reid
 //
@@ -12,37 +12,27 @@
 #import "HCDescription.h"
 
 
-namespace {
-
-NSString* comparison(NSComparisonResult compare)
-{
-    if (compare == NSOrderedDescending)
-        return @"less than";
-    else if (compare == NSOrderedSame)
-        return @"equal to";
-    else
-        return @"greater than";
-}
-
-}   // namespace
-
-
 @implementation HCOrderingComparison
 
-+ (HCOrderingComparison*) compare:(id)aValue
-                       minCompare:(NSComparisonResult)min
-                       maxCompare:(NSComparisonResult)max
++ (id)compare:(id)expectedValue
+   minCompare:(NSComparisonResult)min
+   maxCompare:(NSComparisonResult)max
+   comparisonDescription:(NSString *)description
 {
-    return [[[HCOrderingComparison alloc] initComparing:aValue minCompare:min maxCompare:max]
+    return [[[self alloc] initComparing:expectedValue
+                             minCompare:min
+                             maxCompare:max
+                  comparisonDescription:description]
             autorelease];
 }
 
 
-- (id) initComparing:(id)aValue
-          minCompare:(NSComparisonResult)min
-          maxCompare:(NSComparisonResult)max
+- (id)initComparing:(id)expectedValue
+         minCompare:(NSComparisonResult)min
+         maxCompare:(NSComparisonResult)max
+         comparisonDescription:(NSString *)description
 {
-    if (![aValue respondsToSelector:@selector(compare:)])
+    if (![expectedValue respondsToSelector:@selector(compare:)])
     {
         @throw [NSException exceptionWithName: @"UncomparableObject"
                                        reason: @"Object must respond to compare:"
@@ -52,71 +42,74 @@ NSString* comparison(NSComparisonResult compare)
     self = [super init];
     if (self != nil)
     {
-        value = [aValue retain];
+        expected = [expectedValue retain];
         minCompare = min;
         maxCompare = max;
+        comparisonDescription = [description copy];
     }
     return self;
 }
 
 
-- (void) dealloc
+- (void)dealloc
 {
-    [value release];
+    [expected release];
+    [comparisonDescription release];
     
     [super dealloc];
 }
 
 
-- (BOOL) matches:(id)item
+- (BOOL)matches:(id)item
 {
     if (item == nil)
         return NO;
     
-    NSComparisonResult compare = [value compare:item];
+    NSComparisonResult compare = [expected compare:item];
     return minCompare <= compare && compare <= maxCompare;
 }
 
 
-- (void) describeTo:(id<HCDescription>)description
+- (void)describeTo:(id<HCDescription>)description
 {
-    [[description appendText:@"a value "] appendText:comparison(minCompare)];
-    if (minCompare != maxCompare)
-        [[description appendText:@" or "] appendText:comparison(maxCompare)];
-    [[description appendText:@" "] appendValue:value];
+    [[[[description appendText:@"a value "]
+                    appendText:comparisonDescription]
+                    appendText:@" "]
+                    appendDescriptionOf:expected];
 }
 
 @end
 
+//--------------------------------------------------------------------------------------------------
 
-extern "C" {
-
-id<HCMatcher> HC_greaterThan(id aValue)
+OBJC_EXPORT id<HCMatcher> HC_greaterThan(id aValue)
 {
-    return [HCOrderingComparison compare: aValue
-                              minCompare: NSOrderedAscending
-                              maxCompare: NSOrderedAscending];
+    return [HCOrderingComparison compare:aValue
+                              minCompare:NSOrderedAscending
+                              maxCompare:NSOrderedAscending
+                   comparisonDescription:@"greater than"];
 }
 
-id<HCMatcher> HC_greaterThanOrEqualTo(id aValue)
+OBJC_EXPORT id<HCMatcher> HC_greaterThanOrEqualTo(id aValue)
 {
-    return [HCOrderingComparison compare: aValue
-                              minCompare: NSOrderedAscending
-                              maxCompare: NSOrderedSame];
+    return [HCOrderingComparison compare:aValue
+                              minCompare:NSOrderedAscending
+                              maxCompare:NSOrderedSame
+                   comparisonDescription:@"greater than or equal to"];
 }
 
-id<HCMatcher> HC_lessThan(id aValue)
+OBJC_EXPORT id<HCMatcher> HC_lessThan(id aValue)
 {
-    return [HCOrderingComparison compare: aValue
-                              minCompare: NSOrderedDescending
-                              maxCompare: NSOrderedDescending];
+    return [HCOrderingComparison compare:aValue
+                              minCompare:NSOrderedDescending
+                              maxCompare:NSOrderedDescending
+                   comparisonDescription:@"less than"];
 }
 
-id<HCMatcher> HC_lessThanOrEqualTo(id aValue)
+OBJC_EXPORT id<HCMatcher> HC_lessThanOrEqualTo(id aValue)
 {
-    return [HCOrderingComparison compare: aValue
-                              minCompare: NSOrderedSame
-                              maxCompare: NSOrderedDescending];
+    return [HCOrderingComparison compare:aValue
+                              minCompare:NSOrderedSame
+                              maxCompare:NSOrderedDescending
+                   comparisonDescription:@"less than or equal to"];
 }
-
-}   // extern "C"

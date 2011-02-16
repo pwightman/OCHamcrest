@@ -1,6 +1,6 @@
 //
 //  OCHamcrest - HCIsEqualIgnoringCase.mm
-//  Copyright 2009 www.hamcrest.org. See LICENSE.txt
+//  Copyright 2011 hamcrest.org. See LICENSE.txt
 //
 //  Created by: Jon Reid
 //
@@ -10,21 +10,20 @@
 
     // OCHamcrest
 #import "HCDescription.h"
-#import "HCRequireNonNilString.h"
-using namespace hamcrest;
+#import "HCRequireNonNilObject.h"
 
 
 @implementation HCIsEqualIgnoringCase
 
-+ (HCIsEqualIgnoringCase*) isEqualIgnoringCase:(NSString*)aString
++ (id)isEqualIgnoringCase:(NSString *)aString
 {
-    return [[[HCIsEqualIgnoringCase alloc] initWithString:aString] autorelease];
+    return [[[self alloc] initWithString:aString] autorelease];
 }
 
 
-- (id) initWithString:(NSString*)aString
+- (id)initWithString:(NSString *)aString
 {
-    requireNonNilString(aString);
+    HCRequireNonNilObject(aString);
     
     self = [super init];
     if (self != nil)
@@ -33,15 +32,14 @@ using namespace hamcrest;
 }
 
 
-- (void) dealloc
+- (void)dealloc
 {
     [string release];
-    
     [super dealloc];
 }
 
 
-- (BOOL) matches:(id)item
+- (BOOL)matches:(id)item
 {
     if (![item isKindOfClass:[NSString class]])
         return NO;
@@ -50,21 +48,17 @@ using namespace hamcrest;
 }
 
 
-- (void) describeTo:(id<HCDescription>)description
+- (void)describeTo:(id<HCDescription>)description
 {
-    [[[description appendText:@"equalToIgnoringCase("]
-                    appendValue:string]
-                    appendText:@")"];
+    [[description appendDescriptionOf:string]
+                  appendText:@" ignoring case"];
 }
 
 @end
 
+//--------------------------------------------------------------------------------------------------
 
-extern "C" {
-
-id<HCMatcher> HC_equalToIgnoringCase(NSString* aString)
+OBJC_EXPORT id<HCMatcher> HC_equalToIgnoringCase(NSString *string)
 {
-    return [HCIsEqualIgnoringCase isEqualIgnoringCase:aString];
+    return [HCIsEqualIgnoringCase isEqualIgnoringCase:string];
 }
-
-}   // extern "C"

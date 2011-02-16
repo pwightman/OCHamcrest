@@ -1,6 +1,6 @@
 //
 //  OCHamcrest - HCStringStartsWith.mm
-//  Copyright 2009 www.hamcrest.org. See LICENSE.txt
+//  Copyright 2011 hamcrest.org. See LICENSE.txt
 //
 //  Created by: Jon Reid
 //
@@ -14,13 +14,13 @@
 
 @implementation HCStringStartsWith
 
-+ (HCStringStartsWith*) stringStartsWith:(NSString*)aSubstring
++ (id)stringStartsWith:(NSString *)aSubstring
 {
-    return [[[HCStringStartsWith alloc] initWithSubstring:aSubstring] autorelease];
+    return [[[self alloc] initWithSubstring:aSubstring] autorelease];
 }
 
 
-- (BOOL) matches:(id)item
+- (BOOL)matches:(id)item
 {
     if (![item respondsToSelector:@selector(hasPrefix:)])
         return NO;
@@ -28,24 +28,17 @@
     return [item hasPrefix:substring];
 }
 
-@end
 
-
-@implementation HCStringStartsWith (SubclassResponsibility)
-
-- (NSString*) relationship
+- (NSString *)relationship
 {
     return @"starting with";
 }
 
 @end
 
+//--------------------------------------------------------------------------------------------------
 
-extern "C" {
-
-id<HCMatcher> HC_startsWith(NSString* aSubstring)
+OBJC_EXPORT id<HCMatcher> HC_startsWith(NSString *aSubstring)
 {
     return [HCStringStartsWith stringStartsWith:aSubstring];
 }
-
-}   // extern "C"

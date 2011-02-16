@@ -1,17 +1,20 @@
 //
 //  OCHamcrest - IsCollectionOnlyContainingTest.m
-//  Copyright 2009 www.hamcrest.org. See LICENSE.txt
+//  Copyright 2011 hamcrest.org. See LICENSE.txt
 //
 //  Created by: Jon Reid
 //
 
-    // Inherited
-#import "AbstractMatcherTest.h"
-
-    // OCHamcrest
+    // Class under test
 #define HC_SHORTHAND
 #import "HCIsCollectionOnlyContaining.h"
+
+    // Other OCHamcrest
 #import "HCIsEqual.h"
+#import "HCOrderingComparison.h"
+
+    // Test support
+#import "AbstractMatcherTest.h"
 
 
 @interface IsCollectionOnlyContainingTest : AbstractMatcherTest
@@ -19,52 +22,81 @@
 
 @implementation IsCollectionOnlyContainingTest
 
-- (id<HCMatcher>) createMatcher
+- (id<HCMatcher>)createMatcher
 {
     return onlyContains(equalTo(@"irrelevant"), nil);
 }
 
 
-- (void) testDoesNotMatchEmptyCollection
+- (void)testMatchesSingletonCollection
 {
-    id collection = [NSArray array];
-    assertDoesNotMatch(@"empty collection", onlyContains(equalTo(@"foo"), nil), collection);
+    assertMatches(@"singleton collection",
+                  onlyContains(equalTo(@"a"), nil),
+                  ([NSSet setWithObject:@"a"]));
 }
 
 
-- (void) testMatchesSingletonCollection
+- (void)testMatchesAllItemsWithOneMatcher
 {
-    id collection = [NSSet setWithObject:@"a"];
-    assertMatches(@"singleton collection", onlyContains(equalTo(@"a"), nil), collection);
+    assertMatches(@"one matcher",
+                  onlyContains(lessThan(@"d"), nil),
+                  ([NSArray arrayWithObjects:@"a", @"b", @"c", nil]));
 }
 
 
-- (void) testMatchesCollection
+- (void)testMatchesAllItemsWithMultipleMatchers
 {
-    id collection = [NSSet setWithObjects:@"a", @"b", nil];
-    assertMatches(@"collection", onlyContains(equalTo(@"a"), equalTo(@"b"), nil), collection);
+    assertMatches(@"multiple matcher",
+                  onlyContains(lessThan(@"d"), equalTo(@"hi"), nil),
+                  ([NSArray arrayWithObjects:@"a", @"hi", @"b", @"c", nil]));
 }
 
 
-- (void) testProvidesConvenientShortcutForMatchingWithIsEqualTo
+- (void)testProvidesConvenientShortcutForMatchingWithIsEqualTo
 {
-    id collection = [NSSet setWithObjects:@"a", @"b", nil];
-    assertMatches(@"collection", onlyContains(@"a", equalTo(@"b"), nil), collection);
+    assertMatches(@"Values automatically wrapped with equal_to",
+                  onlyContains(lessThan(@"d"), @"hi", nil),
+                  ([NSArray arrayWithObjects:@"a", @"hi", @"b", @"c", nil]));
 }
 
 
-- (void) testDoesNotMatchCollectionWithMismatchingItem
+- (void)testDoesNotMatchCollectionWithMismatchingItem
 {
-    id collection = [NSArray arrayWithObjects:@"a", @"b", @"c", nil];
-    assertDoesNotMatch(@"collection", onlyContains(@"a", @"b", nil), collection);
+    assertDoesNotMatch(@"d is not less than d",
+                       onlyContains(lessThan(@"d"), nil),
+                       ([NSArray arrayWithObjects:@"b", @"c", @"d", nil]));
 }
 
 
-- (void) testHasAReadableDescription
+- (void)testDoesNotMatchEmptyCollection
+{
+    assertDoesNotMatch(@"empty collection", onlyContains(equalTo(@"foo"), nil), ([NSArray array]));
+}
+
+
+- (void)testMatcherCreationRequiresNonNilArgument
+{    
+    STAssertThrows(onlyContains(nil), @"Should require non-nil list");
+}
+
+
+- (void)testHasAReadableDescription
 {
     assertDescription(@"a collection containing items matching (\"a\" or \"b\")",
                         onlyContains(@"a", @"b", nil));
 
+}
+
+
+- (void)testDescribeMismatch
+{
+    assertDescribeMismatch(@"was \"bad\"", (onlyContains(@"a", @"b", nil)), @"bad");
+}
+
+
+- (void)testDescribeMismatchOfNonCollection
+{
+    assertDescribeMismatch(@"was nil", (onlyContains(@"a", @"b", nil)), nil);
 }
 
 @end

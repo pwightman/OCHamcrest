@@ -1,16 +1,18 @@
 //
 //  OCHamcrest - BaseMatcherTest.m
-//  Copyright 2009 www.hamcrest.org. See LICENSE.txt
+//  Copyright 2011 hamcrest.org. See LICENSE.txt
 //
 //  Created by: Jon Reid
 //
 
-    // Inherited
-#import "AbstractMatcherTest.h"
-
-    // OCHamcrest
+    // Class under test
 #import "HCBaseMatcher.h"
+
+    // Other OCHamcrest
 #import "HCDescription.h"
+
+    // Test support
+#import "AbstractMatcherTest.h"
 
 
 @interface TestingBaseMatcher : HCBaseMatcher
@@ -18,7 +20,7 @@
 
 @implementation TestingBaseMatcher
 
-- (void) describeTo:(id<HCDescription>)description
+- (void)describeTo:(id<HCDescription>)description
 {
     [description appendText:@"SOME DESCRIPTION"];
 }
@@ -31,10 +33,10 @@
 
 @implementation BaseMatcherTest
 
-- (void) testDescribesItselfWithDescriptionMethod
+- (void)testDescriptionShouldDescribeMatcher
 {
-    TestingBaseMatcher* matcher = [[[TestingBaseMatcher alloc] init] autorelease];
-    assertDescription(@"SOME DESCRIPTION", matcher);
+    TestingBaseMatcher *matcher = [[[TestingBaseMatcher alloc] init] autorelease];
+    STAssertEqualObjects(@"SOME DESCRIPTION", [matcher description], nil);
 }
 
 @end

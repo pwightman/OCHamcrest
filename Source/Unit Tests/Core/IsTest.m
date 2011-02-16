@@ -1,6 +1,6 @@
 //
 //  OCHamcrest - IsTest.m
-//  Copyright 2009 www.hamcrest.org. See LICENSE.txt
+//  Copyright 2011 hamcrest.org. See LICENSE.txt
 //
 //  Created by: Jon Reid
 //
@@ -13,19 +13,22 @@
 #import "HCIs.h"
 #import "HCIsEqual.h"
 
+    // Test support
+#import "NeverMatch.h"
+
 
 @interface IsTest : AbstractMatcherTest
 @end
 
 @implementation IsTest
 
-- (id<HCMatcher>) createMatcher
+- (id<HCMatcher>)createMatcher
 {
     return is(@"something");
 }
 
 
-- (void) testJustMatchesTheSameWayTheUnderylingMatcherDoes
+- (void)testDelegatesMatchingToNestedMatcher
 {
     assertMatches(@"should match", is(equalTo(@"A")), @"A");
     assertMatches(@"should match", is(equalTo(@"B")), @"B");
@@ -34,19 +37,41 @@
 }
 
 
-- (void) testGeneratesIsPrefixInDescription
+- (void)testDescriptionShouldPassThrough
 {
-    assertDescription(@"is \"A\"", is(equalTo(@"A")));
+    assertDescription(@"\"A\"", is(equalTo(@"A")));
 }
 
 
-- (void) testProvidesConvenientShortcutForIsEqualTo
+- (void)testProvidesConvenientShortcutForIsEqualTo
 {
     assertMatches(@"should match", is(@"A"), @"A");
     assertMatches(@"should match", is(@"B"), @"B");
     assertDoesNotMatch(@"should not match", is(@"A"), @"B");
     assertDoesNotMatch(@"should not match", is(@"B"), @"A");
-    assertDescription(@"is \"A\"", is(@"A"));
+    assertDescription(@"\"A\"", is(@"A"));
+}
+
+
+- (void)testSuccessfulMatchDoesNotGenerateMismatchDescription
+{
+    assertNoMismatchDescription(is(@"A"), @"A");
+}
+
+
+- (void)testDelegatesMismatchDescriptionToNestedMatcher
+{
+    assertMismatchDescription([NeverMatch mismatchDescription],
+                              is([NeverMatch neverMatch]),
+                              @"hi");
+}
+
+
+- (void)testDelegatesDescribeMismatchToNestedMatcher
+{
+    assertDescribeMismatch([NeverMatch mismatchDescription],
+                           is([NeverMatch neverMatch]),
+                           @"hi");
 }
 
 @end

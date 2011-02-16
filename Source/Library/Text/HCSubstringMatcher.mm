@@ -1,6 +1,6 @@
 //
 //  OCHamcrest - HCSubstringMatcher.mm
-//  Copyright 2009 www.hamcrest.org. See LICENSE.txt
+//  Copyright 2011 hamcrest.org. See LICENSE.txt
 //
 //  Created by: Jon Reid
 //
@@ -10,20 +10,19 @@
 
     // OCHamcrest
 #import "HCDescription.h"
-#import "HCRequireNonNilString.h"
-using namespace hamcrest;
+#import "HCRequireNonNilObject.h"
 
 
 @interface HCSubstringMatcher (SubclassResponsibility)
-- (NSString*) relationship;
+- (NSString *)relationship;
 @end
 
 
 @implementation HCSubstringMatcher
 
-- (id) initWithSubstring:(NSString*)aSubstring
+- (id)initWithSubstring:(NSString *)aSubstring
 {
-    requireNonNilString(aSubstring);
+    HCRequireNonNilObject(aSubstring);
     
     self = [super init];
     if (self != nil)
@@ -32,7 +31,7 @@ using namespace hamcrest;
 }
 
 
-- (void) dealloc
+- (void)dealloc
 {
     [substring release];
     
@@ -40,12 +39,12 @@ using namespace hamcrest;
 }
 
 
-- (void) describeTo:(id<HCDescription>)description
+- (void)describeTo:(id<HCDescription>)description
 {
     [[[[description appendText:@"a string "]
                     appendText:[self relationship]]
                     appendText:@" "]
-                    appendValue:substring];
+                    appendDescriptionOf:substring];
 }
 
 @end

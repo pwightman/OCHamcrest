@@ -1,65 +1,95 @@
 //
 //  OCHamcrest - IsEqualIgnoringCaseTest.m
-//  Copyright 2009 www.hamcrest.org. See LICENSE.txt
+//  Copyright 2011 hamcrest.org. See LICENSE.txt
 //
 //  Created by: Jon Reid
 //
 
-    // Inherited
-#import "AbstractMatcherTest.h"
-
-    // OCHamcrest
+    // Class under test
 #define HC_SHORTHAND
 #import "HCIsEqualIgnoringCase.h"
-#import "HCIsNot.h"
-#import "HCMatcherAssert.h"
+
+    // Test support
+#import "AbstractMatcherTest.h"
 
 
 @interface IsEqualIgnoringCaseTest : AbstractMatcherTest
+{
+    id<HCMatcher> matcher;
+}
 @end
+
 
 @implementation IsEqualIgnoringCaseTest
 
-- (id<HCMatcher>) createMatcher
+- (void)setUp
 {
-    return equalToIgnoringCase(@"irrelevant");
+    matcher = [equalToIgnoringCase(@"heLLo") retain];
 }
 
 
-- (void) testIgnoresCaseOfCharsInString
+- (void)tearDown
 {
-    assertThat(@"HELLO", equalToIgnoringCase(@"heLLo"));
-    assertThat(@"hello", equalToIgnoringCase(@"heLLo"));
-    assertThat(@"HelLo", equalToIgnoringCase(@"heLLo"));
-
-    assertThat(@"bye", isNot(equalToIgnoringCase(@"heLLo")));
+    [matcher release];
 }
 
 
-- (void) testFailsIfAdditionalWhitespaceIsPresent
+- (id<HCMatcher>)createMatcher
 {
-    assertThat(@"heLLo ", isNot(equalToIgnoringCase(@"heLLo")));
-    assertThat(@" heLLo", isNot(equalToIgnoringCase(@"heLLo")));
+    return matcher;
 }
 
 
-- (void) testFailsIfMatchingAgainstNil
+- (void)testIgnoresCaseOfCharsInString
 {
-    assertThat(nil, isNot(equalToIgnoringCase(@"heLLo")));
+    assertMatches(@"all upper", matcher, @"HELLO");
+    assertMatches(@"all lower", matcher, @"hello");
+    assertMatches(@"mixed up", matcher, @"HelLo");
+    
+    assertDoesNotMatch(@"no match", matcher, @"bye");
 }
 
 
-- (void) testConstructorRequiresNonNilArgument
-{    
-    STAssertThrows(equalToIgnoringCase(nil), @"should require non-nil argument");
-}
-
-
-- (void) testHasAReadableDescription
+- (void)testFailsIfAdditionalWhitespaceIsPresent
 {
-    assertDescription(@"equalToIgnoringCase(\"heLLo\")",
-                        equalToIgnoringCase(@"heLLo"));
+    assertDoesNotMatch(@"whitespace suffix", matcher, @"heLLo ");
+    assertDoesNotMatch(@"whitespace prefix", matcher, @" heLLo");
 }
 
+
+- (void)testMatcherCreationRequiresNonNilArgument
+{
+    STAssertThrows(equalToIgnoringCase(nil), @"Should require non-nil argument");
+}
+
+
+- (void)testFailsIfMatchingAgainstNonString
+{
+    assertDoesNotMatch(@"non-string", matcher, [NSNumber numberWithInt:3]);
+}
+
+
+- (void)testHasAReadableDescription
+{
+    assertDescription(@"\"heLLo\" ignoring case", matcher);
+}
+
+
+- (void)testSuccessfulMatchDoesNotGenerateMismatchDescription
+{
+    assertNoMismatchDescription(matcher, @"hello");
+}
+
+
+- (void)testMismatchDescriptionShowsActualArgument
+{
+    assertMismatchDescription(@"was \"bad\"", matcher, @"bad");
+}
+
+
+- (void)testDescribeMismatch
+{
+    assertDescribeMismatch(@"was \"bad\"", matcher, @"bad");
+}
 
 @end

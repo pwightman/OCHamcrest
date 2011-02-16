@@ -1,6 +1,6 @@
 //
 //  OCHamcrest - HCIsDictionaryContaining.mm
-//  Copyright 2009 www.hamcrest.org. See LICENSE.txt
+//  Copyright 2011 hamcrest.org. See LICENSE.txt
 //
 //  Created by: Jon Reid
 //
@@ -10,32 +10,34 @@
 
     // OCHamcrest
 #import "HCDescription.h"
+#import "HCRequireNonNilObject.h"
 #import "HCWrapInMatcher.h"
 
 
 @implementation HCIsDictionaryContaining
 
-+ (HCIsDictionaryContaining*) isDictionaryContainingKey:(id<HCMatcher>)theKeyMatcher
-                                                  value:(id<HCMatcher>)theValueMatcher;
++ (id)isDictionaryContainingKey:(id<HCMatcher>)aKeyMatcher
+                          value:(id<HCMatcher>)aValueMatcher
 {
-    return [[[HCIsDictionaryContaining alloc]
-                    initWithKeyMatcher:theKeyMatcher valueMatcher:theValueMatcher] autorelease];
+    return [[[self alloc]
+                    initWithKeyMatcher:aKeyMatcher valueMatcher:aValueMatcher] autorelease];
 }
 
 
-- (id) initWithKeyMatcher:(id<HCMatcher>)theKeyMatcher valueMatcher:(id<HCMatcher>)theValueMatcher;
+- (id)initWithKeyMatcher:(id<HCMatcher>)aKeyMatcher
+            valueMatcher:(id<HCMatcher>)aValueMatcher
 {
     self = [super init];
     if (self != nil)
     {
-        keyMatcher = [theKeyMatcher retain];
-        valueMatcher = [theValueMatcher retain];
+        keyMatcher = [aKeyMatcher retain];
+        valueMatcher = [aValueMatcher retain];
     }
     return self;
 }
 
 
-- (void) dealloc
+- (void)dealloc
 {
     [valueMatcher release];
     [keyMatcher release];
@@ -44,17 +46,11 @@
 }
 
 
-- (BOOL) matches:(id)dict
+- (BOOL)matches:(id)dict
 {
     if ([dict isKindOfClass:[NSDictionary class]])
     {
-#if defined(OBJC_API_VERSION) && OBJC_API_VERSION >= 2
         for (id oneKey in dict)
-#else
-        NSEnumerator* enumerator = [dict keyEnumerator];
-        id oneKey;
-        while ((oneKey = [enumerator nextObject]) != nil)
-#endif
         {
             if ([keyMatcher matches:oneKey] && [valueMatcher matches:[dict objectForKey:oneKey]])
                 return YES;
@@ -64,24 +60,23 @@
 }
 
 
-- (void) describeTo:(id<HCDescription>)description
+- (void)describeTo:(id<HCDescription>)description
 {
-    [[[[[description appendText:@"dictionary containing ["]
-                    appendDescriptionOf:keyMatcher]
-                    appendText:@"->"]
-                    appendDescriptionOf:valueMatcher]
-                    appendText:@"]"];
+    [[[[[description appendText:@"a dictionary containing { "]
+                     appendDescriptionOf:keyMatcher]
+                     appendText:@" = "]
+                     appendDescriptionOf:valueMatcher]
+                     appendText:@"; }"];
 }
 
 @end
 
+//--------------------------------------------------------------------------------------------------
 
-extern "C" {
-
-id<HCMatcher> HC_hasEntry(id key, id value)
+OBJC_EXPORT id<HCMatcher> HC_hasEntry(id keyMatcher, id valueMatcher)
 {
-    return [HCIsDictionaryContaining isDictionaryContainingKey:HC_wrapInMatcher(key)
-                                                         value:HC_wrapInMatcher(value)];
+    HCRequireNonNilObject(keyMatcher);
+    HCRequireNonNilObject(valueMatcher);
+    return [HCIsDictionaryContaining isDictionaryContainingKey:HCWrapInMatcher(keyMatcher)
+                                                         value:HCWrapInMatcher(valueMatcher)];
 }
-
-}   // extern "C"

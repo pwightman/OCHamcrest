@@ -1,15 +1,23 @@
 //
 //  OCHamcrest - OCHamcrest.h
-//  Copyright 2009 www.hamcrest.org. See LICENSE.txt
+//  Copyright 2011 hamcrest.org. See LICENSE.txt
 //
 //  Created by: Jon Reid
 //
 
-    // Unit test integration
-#import "HCMatcherAssert.h"
-#import "HCNumberAssert.h"
+/**
+	@defgroup library Matcher Library
 
-    // Core
+	Library of Matcher implementations
+ */
+
+/**
+	@defgroup core_matchers Core Matchers
+ 
+	Fundamental matchers of objects and values, and composite matchers
+ 
+	@ingroup library
+ */
 #import "HCAllOf.h"
 #import "HCAnyOf.h"
 #import "HCDescribedAs.h"
@@ -21,25 +29,88 @@
 #import "HCIsNot.h"
 #import "HCIsSame.h"
 
-    // Library: Collection
+/**
+	@defgroup collection_matchers Collection Matchers
+    
+    Matchers of collections
+ 
+	@ingroup library
+ */
+#import "HCHasCount.h"
 #import "HCIsCollectionContaining.h"
+#import "HCIsCollectionContainingInAnyOrder.h"
+#import "HCIsCollectionContainingInOrder.h"
 #import "HCIsCollectionOnlyContaining.h"
 #import "HCIsDictionaryContaining.h"
+#import "HCIsDictionaryContainingEntries.h"
 #import "HCIsDictionaryContainingKey.h"
 #import "HCIsDictionaryContainingValue.h"
+#import "HCIsEmptyCollection.h"
 #import "HCIsIn.h"
 
-    // Library: Number
+/**
+	@defgroup number_matchers Number Matchers
+    
+    Matchers that perform numeric comparisons
+ 
+	@ingroup library
+ */
 #import "HCIsCloseTo.h"
-#import "HCIsEqualToNumber.h"
 #import "HCOrderingComparison.h"
 
-    // Library: Object
+/**
+	@defgroup primitive_number_matchers Primitive Number Matchers
+
+	Matchers for testing equality against primitive numeric types
+
+	@ingroup number_matchers
+ */
+#import "HCIsEqualToNumber.h"
+
+/**
+	@defgroup object_matchers Object Matchers
+    
+    Matchers that inspect objects
+ 
+	@ingroup library
+ */
 #import "HCHasDescription.h"
 
-    // Library: Text
+/**
+	@defgroup text_matchers Text Matchers
+    
+    Matchers that perform text comparisons
+ 
+	@ingroup library
+ */
 #import "HCIsEqualIgnoringCase.h"
 #import "HCIsEqualIgnoringWhiteSpace.h"
 #import "HCStringContains.h"
 #import "HCStringEndsWith.h"
 #import "HCStringStartsWith.h"
+
+/**
+	@defgroup integration Unit Test Integration
+ */
+#import "HCAssertThat.h"
+
+/**
+	@defgroup integration_numeric Unit Tests of Primitive Numbers
+
+	Unit test integration for primitive numbers
+
+	@ingroup integration
+ */
+#import "HCNumberAssert.h"
+
+/**
+	@defgroup core Core API
+ */
+
+/**
+	@defgroup helpers Helpers
+ 
+	Utilities for writing Matchers
+ 
+	@ingroup core
+ */

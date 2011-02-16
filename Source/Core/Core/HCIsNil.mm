@@ -1,6 +1,6 @@
 //
 //  OCHamcrest - HCIsNil.mm
-//  Copyright 2009 www.hamcrest.org. See LICENSE.txt
+//  Copyright 2011 hamcrest.org. See LICENSE.txt
 //
 //  Created by: Jon Reid
 //
@@ -15,37 +15,34 @@
 
 @implementation HCIsNil
 
-+ (HCIsNil*) isNil
++ (id)isNil
 {
-    return [[[HCIsNil alloc] init] autorelease];
+    return [[[self alloc] init] autorelease];
 }
 
 
-- (BOOL) matches:(id)item
+- (BOOL)matches:(id)item
 {
     return item == nil;
 }
 
 
-- (void) describeTo:(id<HCDescription>)description
+- (void)describeTo:(id<HCDescription>)description
 {
     [description appendText:@"nil"];
 }
 
 @end
 
+//--------------------------------------------------------------------------------------------------
 
-extern "C" {
-
-id<HCMatcher> HC_nilValue()
+OBJC_EXPORT id<HCMatcher> HC_nilValue()
 {
     return [HCIsNil isNil];
 }
 
 
-id<HCMatcher> HC_notNilValue()
+OBJC_EXPORT id<HCMatcher> HC_notNilValue()
 {
     return HC_isNot([HCIsNil isNil]);
 }
-
-}   // extern "C"

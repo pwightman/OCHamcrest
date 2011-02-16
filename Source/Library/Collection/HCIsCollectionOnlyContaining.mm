@@ -1,6 +1,6 @@
 //
 //  OCHamcrest - HCIsCollectionOnlyContaining.mm
-//  Copyright 2009 www.hamcrest.org. See LICENSE.txt
+//  Copyright 2011 hamcrest.org. See LICENSE.txt
 //
 //  Created by: Jon Reid
 //
@@ -11,18 +11,19 @@
     // OCHamcrest
 #import "HCAnyOf.h"
 #import "HCDescription.h"
+#import "HCRequireNonNilObject.h"
 #import "HCWrapInMatcher.h"
 
 
 @implementation HCIsCollectionOnlyContaining
 
-+ (HCIsCollectionOnlyContaining*) isCollectionOnlyContaining:(id<HCMatcher>)aMatcher
++ (id)isCollectionOnlyContaining:(id<HCMatcher>)aMatcher
 {
-    return [[[HCIsCollectionOnlyContaining alloc] initWithMatcher:aMatcher] autorelease];
+    return [[[self alloc] initWithMatcher:aMatcher] autorelease];
 }
 
 
-- (id) initWithMatcher:(id<HCMatcher>)aMatcher
+- (id)initWithMatcher:(id<HCMatcher>)aMatcher
 {
     self = [super init];
     if (self != nil)
@@ -31,34 +32,22 @@
 }
 
 
-- (void) dealloc
+- (void)dealloc
 {
     [matcher release];
-    
     [super dealloc];
 }
 
 
-- (BOOL) matches:(id)collection
+- (BOOL)matches:(id)collection
 {
-#if defined(OBJC_API_VERSION) && OBJC_API_VERSION >= 2
     if (![collection conformsToProtocol:@protocol(NSFastEnumeration)])
         return NO;
-#else
-    if (![collection respondsToSelector:@selector(objectEnumerator)])
-        return NO;
-#endif
     
     if ([collection count] == 0)
         return NO;
     
-#if defined(OBJC_API_VERSION) && OBJC_API_VERSION >= 2
     for (id item in collection)
-#else
-    NSEnumerator* enumerator = [collection objectEnumerator];
-    id item;
-    while ((item = [enumerator nextObject]) != nil)
-#endif
     {
         if (![matcher matches:item])
             return NO;
@@ -67,32 +56,30 @@
 }
 
 
-- (void) describeTo:(id<HCDescription>)description
+- (void)describeTo:(id<HCDescription>)description
 {
     [[description appendText:@"a collection containing items matching "]
-                    appendDescriptionOf:matcher];
+                  appendDescriptionOf:matcher];
 }
 
 @end
 
+//--------------------------------------------------------------------------------------------------
 
-extern "C" {
-
-id<HCMatcher> HC_onlyContains(id item, ...)
+OBJC_EXPORT id<HCMatcher> HC_onlyContains(id items, ...)
 {
-    NSMutableArray* matcherList = [NSMutableArray arrayWithObject:HC_wrapInMatcher(item)];
+    HCRequireNonNilObject(items);
+    NSMutableArray *matchers = [NSMutableArray arrayWithObject:HCWrapInMatcher(items)];
     
     va_list args;
-    va_start(args, item);
-    item = va_arg(args, id);
-    while (item != nil)
+    va_start(args, items);
+    items = va_arg(args, id);
+    while (items != nil)
     {
-        [matcherList addObject:HC_wrapInMatcher(item)];
-        item = va_arg(args, id);
+        [matchers addObject:HCWrapInMatcher(items)];
+        items = va_arg(args, id);
     }
     va_end(args);
     
-    return [HCIsCollectionOnlyContaining isCollectionOnlyContaining:[HCAnyOf anyOf:matcherList]];
+    return [HCIsCollectionOnlyContaining isCollectionOnlyContaining:[HCAnyOf anyOf:matchers]];
 }
-
-}   // extern "C"
