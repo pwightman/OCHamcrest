@@ -5,5 +5,7 @@
 Source/build
 
 # Files in the projects
-Source/OCHamcrest.xcodeproj/*.mode1v3
-Source/OCHamcrest.xcodeproj/*.pbxuser
+*.mode1v3
+*.pbxuser
+*.xcworkspace
+xcuserdata
