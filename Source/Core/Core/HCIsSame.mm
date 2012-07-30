@@ -45,14 +45,14 @@
 
 - (void)describeMismatchOf:(id)item to:(id<HCDescription>)mismatchDescription
 {
-    [[mismatchDescription appendText:[NSString stringWithFormat:@"was 0x%0x ", item]]
+    [[mismatchDescription appendText:[NSString stringWithFormat:@"was 0x%px ", item]]
                  appendDescriptionOf:item];
 }
 
 
 - (void)describeTo:(id<HCDescription>)description
 {
-    [[description appendText:[NSString stringWithFormat:@"same instance as 0x%0x ", object]]
+    [[description appendText:[NSString stringWithFormat:@"same instance as 0x%px ", object]]
          appendDescriptionOf:object];
 }
 
