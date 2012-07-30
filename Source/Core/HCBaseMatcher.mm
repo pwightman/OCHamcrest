@@ -22,7 +22,7 @@
 {
 	NSString *className = NSStringFromClass([self class]);
     [NSException raise:NSGenericException
-                format:@"-[%@  %s] not implemented", className, command];
+                format:@"-[%@  %p] not implemented", className, command];
 }
 
 @end
